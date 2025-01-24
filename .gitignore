@@ -1,0 +1,62 @@
+# Node.js dependencies
+**/node_modules
+
+# Logs
+**/logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+**/pids
+**/*.pid
+**/*.pid.lock
+
+# Environment variables
+**/.env
+**/.env.*.local
+
+# Editor directories and files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Build output
+**/dist/
+**/build/
+**/public/build/
+
+# Dependency directories
+**/bower_components/
+**/.pnp
+.pnp.js
+
+# Miscellaneous
+.DS_Store
+Thumbs.db
+
+# pnpm specific
+**/pnpm-lock.yaml
+
+# ESLint cache
+**/.eslintcache
+
+# Prettier cache
+**/.prettierignore
+
+# Vite
+**/vite.config.js
+**/public/vite.svg
+
+# Debug
+**/debug.log*
+
+# Git
+**/.git
+
+# Temporary files
+*.tmp
+*.temp
