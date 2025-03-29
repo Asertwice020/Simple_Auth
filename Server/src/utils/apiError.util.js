@@ -2,21 +2,29 @@ class ApiError extends Error {
   constructor(
     statusCode = null,
     message = "API ERROR HAPPENED (DEFAULT-MSG)",
-    debuggingTip = null,
     errors = [],
-    stack = "",
+    stack = ""
   ) {
     super(message);
     this.statusCode = statusCode;
     this.message = message;
-    debuggingTip && (this.debuggingTip = debuggingTip);
-    this.errors = Array.isArray(errors) ? errors : [errors];
+    this.debuggingTip = null,
+    this.error = {
+      errors: Array.isArray(errors) ? errors : [errors],
+      stack: stack || "",
+    };
     this.data = null;
     this.success = false;
 
-    stack
-      ? (this.stack = stack)
-      : Error.captureStackTrace(this, this.constructor);
+    if (!stack) {
+      Error.captureStackTrace(this, this.constructor);
+    }
+  }
+
+  // * Add method to set debugging tip
+  setDebuggingTip(tip) {
+    this.debuggingTip = tip;
+    return this;
   }
 }
 

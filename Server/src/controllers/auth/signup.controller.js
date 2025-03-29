@@ -3,41 +3,15 @@ import {ApiError} from '../../utils/apiError.util.js'
 import {ApiResponse} from '../../utils/apiResponse.util.js'
 import { User } from "../../models/user.model.js";
 import { accessTokenCookieOptions, refreshTokenCookieOptions } from '../../config/cookies.config.js'
-import generateTokens from './generateTokens.js'
+import { SERVER } from "../../constants.js";
+import generateTokens from "../../utils/generateTokens.util.js";
+import {sendMail} from '../../services/mail/actions.mail.js'
 
-const signup = asyncHandler(async (req, res, next) => {
+const signUp = asyncHandler(async (req, res) => {
   try {
     const {username, email, password} = req.body
     
-    // * all fields are required
-    const emptyFieldsValidation = [username, email, password].some(
-      (field) => !field || field.trim().length === 0
-    );
-
-    if (emptyFieldsValidation) {
-      throw new ApiError(400, "All Fields Are Required!");
-    }
-
-    // * username regex
-    const usernameRegex = /^[a-zA-Z0-9._-]+$/;
-
-    if (!usernameRegex.test(username.trim())) {
-      throw new ApiError(400, "Invalid Username!");
-    }
-
-    // * email
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-
-    if (!emailRegex.test(email.trim())) {
-      throw new ApiError(400, "Invalid Email Address!");
-    }
-
-    // * password length
-    if (password.trim().length < 8) {
-      throw new ApiError(400, "Password Must Be At Least 8 Characters!");
-    }
-
-    // * does user already exist
+    // * Check if user already exists
     const existedUser = await User.findOne({
       $or: [{ username }, { email }],
     });
@@ -46,41 +20,67 @@ const signup = asyncHandler(async (req, res, next) => {
       throw new ApiError(
         409,
         "User With This Username or Email Already Exists!"
-      );
+      ).setDebuggingTip("Check if the username or email is already registered in the database");
     }
-  
-    // * create user
+
+    // * Generate verification code
+    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+    // * Send verification email
+    const {info, mailSentAt} = await sendMail('VERIFICATION', username, email, { verificationCode })
+
+
+    if (!info && !mailSentAt) {
+      throw new ApiError(500, "Failed To Send Verification Email!")
+        .setDebuggingTip("Check mail service configuration and connectivity");
+    }
+
+    // * Create user document
     const user = await User.create({
+      avatar: "",
       username: username.toLowerCase(),
       email: email.toLowerCase(),
-      password: await User.hashPassword(password),
-    })
-  
-    if (!user) {
-      throw new ApiError(500, "Failed To Create User Document In DB!");
-    }
-  
-    // * generate tokens
-    const { accessToken, refreshToken } = await generateTokens(user._id);
+      password: password.trim(),
+      verificationCode,
+      verificationCodeExpiresAt: mailSentAt + SERVER.MAIL.VERIFICATION_EXPIRY_MS,
+    });
     
-    // * send response
+    if (!user) {
+      throw new ApiError(500, "Failed To Create User Document In DB!")
+        .setDebuggingTip("Check database connection and User model validation");
+    }
+    
+    // * Generate tokens
+    const { accessToken, refreshToken } = await generateTokens(user._id);
+
+    // * Update user with refresh token
+    user.refreshToken = refreshToken;
+    user.refreshTokenExpiresAt = Date.now() + SERVER.TOKENS.REFRESH_TOKEN.COOKIE_EXPIRY_MS;
+
+    // * Save user without validation
+    await user.save({ validateBeforeSave: false });
+
+    // * Send response
     return res
-    .status(201)
-    // * set tokens by cookies
-    .cookie("accessToken", accessToken, accessTokenCookieOptions)
-    .cookie("refreshToken", refreshToken, refreshTokenCookieOptions)
-    .json(
-      new ApiResponse(200, "Your Account Created Successfully!", {data: {...user, password: null, refreshToken: null}, accessToken})
-    );
+      .status(201)
+      // * set token by cookie
+      .cookie("accessToken", accessToken, accessTokenCookieOptions)
+      .cookie("refreshToken", refreshToken, refreshTokenCookieOptions)
+      .json(
+        new ApiResponse(201, "User Signed Up Successfully!", {
+          ...user._doc, 
+          password: null, 
+          refreshToken: null,
+        })
+      );
 
   } catch (error) {
     throw new ApiError(
-      500,
-      error?.message || "Something Went Wrong While Registering The User!",
-      error,
-      error?.stack
-    );
+      error.statusCode || 500,
+      error.message || "Something Went Wrong While Signing Up!",
+      error.errors || [],
+      error.stack
+    ).setDebuggingTip(error.debuggingTip || "Review the sign-up flow for unexpected failures");
   }
 });
 
-export default signup
+export default signUp;

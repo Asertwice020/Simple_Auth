@@ -35,20 +35,37 @@ const ENV = {
 
   MONGODB_URI: validateEnvVar("MONGODB_URI", "string"),
 
-  ACCESS_TOKEN_SECRET: validateEnvVar("ACCESS_TOKEN_SECRET", "string"),
+  ACCESS_TOKEN_JWT_SECRET: validateEnvVar("ACCESS_TOKEN_JWT_SECRET", "string"),
 
-  REFRESH_TOKEN_SECRET: validateEnvVar("REFRESH_TOKEN_SECRET", "string"),
-
-  ACCESS_TOKEN_JWT_EXPIRY: validateEnvVar("ACCESS_TOKEN_JWT_EXPIRY", "string"),
-
-  REFRESH_TOKEN_JWT_EXPIRY: validateEnvVar(
-    "REFRESH_TOKEN_JWT_EXPIRY",
-    "string"
-  ),
+  REFRESH_TOKEN_JWT_SECRET: validateEnvVar("REFRESH_TOKEN_JWT_SECRET", "string"),
 
   CLIENT_CORS_ORIGIN: validateEnvVar("CLIENT_CORS_ORIGIN", "array"),
 
   NODE_ENV: validateEnvVar("NODE_ENV", "string"),
+
+  NODE_MAILER_GOOGLE_EMAIL: validateEnvVar("NODE_MAILER_GOOGLE_EMAIL", "string"),
+
+  NODE_MAILER_GOOGLE_PASS: validateEnvVar( "NODE_MAILER_GOOGLE_PASS", "string" ),
+
+  RESET_PASSWORD_MAIL_JWT_SECRET: validateEnvVar("RESET_PASSWORD_MAIL_JWT_SECRET", "string"),
+
+  RESET_PASSWORD_MAIL_JWT_EXPIRY: validateEnvVar(
+    "RESET_PASSWORD_MAIL_JWT_EXPIRY",
+    "string"
+  ),
+
+  GOOGLE_CLIENT_ID: validateEnvVar("GOOGLE_CLIENT_ID", "string"),
+  GOOGLE_CLIENT_SECRET: validateEnvVar("GOOGLE_CLIENT_SECRET", "string"),
+  GOOGLE_CALLBACK_URI: validateEnvVar("GOOGLE_CALLBACK_URI", "string"),
+ 
+  FACEBOOK_APP_ID: validateEnvVar("FACEBOOK_APP_ID", "string"),
+  FACEBOOK_APP_SECRET: validateEnvVar("FACEBOOK_APP_SECRET", "string"),
+  FACEBOOK_CALLBACK_URI: validateEnvVar("FACEBOOK_CALLBACK_URI", "string"),
+ 
+  GITHUB_CLIENT_ID: validateEnvVar("GITHUB_CLIENT_ID", "string"),
+  GITHUB_CLIENT_SECRET: validateEnvVar("GITHUB_CLIENT_SECRET", "string"),
+  GITHUB_CALLBACK_URI: validateEnvVar("GITHUB_CALLBACK_URI", "string"),
+
 };
 
 export { ENV };

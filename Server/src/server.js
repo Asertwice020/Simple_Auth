@@ -1,5 +1,5 @@
 import { app } from "./app.js";
-import { ConnectDB } from "./db/connectDB.js";
+import { ConnectDB } from "./config/db.config.js";
 import { ENV } from "./config/env.config.js";
 import { ApiError } from "./utils/apiError.util.js";
 

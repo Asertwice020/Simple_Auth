@@ -1,14 +1,7 @@
+import cloudinary from "./config.cloudinary.js";
 import fs from "fs";
-import { v2 as cloudinary } from "cloudinary";
 import { ApiError } from "./apiError.util.js";
 import { SERVER } from "../constants.js";
-import { ENV } from "../config/env.config.js";
-
-cloudinary.config({
-  cloud_name: ENV.CLOUDINARY_CLOUD_NAME,
-  api_key: ENV.CLOUDINARY_API_KEY,
-  api_secret: ENV.CLOUDINARY_API_SECRET,
-});
 
 const uploadToCloudinary = async (localFilePath) => {
   try {
@@ -17,7 +10,7 @@ const uploadToCloudinary = async (localFilePath) => {
     }
     const response = await cloudinary.uploader.upload(localFilePath, {
       resource_type: "auto",
-      folder: SERVER.USERS_AVATAR_STORED_FOLDER,
+      folder: SERVER.D_FOLDER,
     });
 
     // LOG
@@ -104,7 +97,6 @@ const deleteFromCloudinary = async (oldAvatarUrl) => {
     );
   }
 };
-
 const isResourceExists = async (publicId, resourceType = "image") => {
   try {
     if (!publicId) {
